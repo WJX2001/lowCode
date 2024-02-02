@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DOM元素拖动</title>
+
+    <style>
+      body {
+        height: 100vh;
+      }
+      #drag_parent {
+        position: relative;
+        width: 300px;
+        height: 200px;
+        background-color: beige;
+      }
+      #drag_dom {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100px;
+        height: 80px;
+        background-color: chocolate;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="drag_parent">
+      <div id="drag_dom"></div>
+    </div>
+
+    <script>
+      const dragObjCom = {
+        dragObj: null, // 被拖拽元素
+        parentObj: null, // 被拖拽元素的父元素
+        dragFlag: false, // 拖拽开始的标识
+        topDistance: 0,
+        leftDistance: 0, // 待拖拽元素的top left距离
+        rectOfDragObj: null, // 获取被拖拽DOM的视口边缘距离 top right bottom left
+
+        /*
+        DOM元素拖拽函数封装
+        @param { object } dragObj 被拖拽元素
+        @param { object } parentObj 被拖拽元素的父元素
+      */
+        dragDomFunc(dragObj, parentObj = document.body) {
+          this.dragObj = dragObj
+          this.parentObj = parentObj
+
+          // 监听鼠标按下事件
+          document.addEventListener('mousedown', (event) =>
+            this.mouseDownforDrag(event)
+          )
+
+          // 监听鼠标松开事件
+          document.addEventListener('mouseup', () => this.mouseUpForDrag())
+
+          // 监听鼠标移动事件
+          document.addEventListener('mousemove', (event) =>
+            this.mouseMoveForDrag(event)
+          )
+        },
+
+        // getBoundingClientRect方法改写 - 当父元素不是document.body时
+        handleGetBoundingClientRect() {
+          const parentRectObj = this.parentObj.getBoundingClientRect()
+          const top = parentRectObj.top
+          const right = parentRectObj.right
+          const bottom = parentRectObj.bottom
+          const left = parentRectObj.left
+
+          const boundingClientRectObj = {
+            width: this.dragObj.offsetWidth,
+            height: this.dragObj.offsetHeight,
+            top,
+            right,
+            bottom,
+            left,
+          }
+          return boundingClientRectObj
+        },
+
+        // 鼠标按下方法
+        mouseDownforDrag(event) {
+          if (event.target !== this.dragObj) return
+          // 开始拖拽
+          this.dragFlag = true
+          if (this.parentObj === document.body) {
+            this.rectOfDragObj = this.dragObj.getBoundingClientRect()
+          } else {
+            this.rectOfDragObj = this.handleGetBoundingClientRect()
+          }
+        },
+
+        // 鼠标松开方法
+        mouseUpForDrag() {
+          // 拖拽停止
+          this.dragFlag = false
+          // 做元素定位左、上是否溢出可视区
+          if (this.dragObj.style.top.split('px')[0] < 0)
+            this.dragObj.style.top = '0px'
+          if (this.dragObj.style.left.split('px')[0] < 0)
+            this.dragObj.style.left = '0px'
+        },
+
+        // 鼠标移动方法
+        mouseMoveForDrag(e) {
+          // 非拖拽状态下直接返回
+          if (!this.dragFlag) return
+          /*
+          clientX，clientY分别代表鼠标距离屏幕可视区左上角的距离
+          减去被拖拽元素的宽高的1/2
+          【目的】在拖动过程中鼠标始终停留在元素的中心位置
+          【引发的问题】
+            1. 停止拖动后，若 -top <= -rectOfDragObj.height/2, -left <= -rectOfDragObj.width/2 也识别超出可视区外，所以在监听鼠标松开时做判断
+            2. 拖动过程，距离右、下距离分别为 rectOfDragObj.width/2、rectOfDragObj.height/2 时，被拖拽元素迅速定位到可视区域的宽高最大值，需要在，移出右、上的判断中减去这部分的值
+        */
+          leftDistance = e.clientX - this.rectOfDragObj.width / 2
+          topDistance = e.clientY - this.rectOfDragObj.height / 2
+
+          // 处理鼠标移出屏幕可视区的判断
+          let clientWidth = this.parentObj.clientWidth // 获取父元素的可视宽度
+          let clientHeight = this.parentObj.clientHeight // 获取父元素的可视高度
+
+          //【下面的判断都加了 this.rectOfDragObj.width(height)/2的判断，是因为上面逻辑把鼠标的位置放到拖拽元素的中心位置】
+          // 移出左边区域
+          if (e.clientX - this.rectOfDragObj.width / 2 <= 0) leftDistance = 0
+          // 移出上边区域
+          if (e.clientY - this.rectOfDragObj.height / 2 <= 0) topDistance = 0
+          // 移出右边区域
+          if (
+            e.clientX +
+              this.rectOfDragObj.width -
+              this.rectOfDragObj.width / 2 >
+            clientWidth
+          ) {
+            leftDistance = clientWidth - this.rectOfDragObj.width
+          }
+          // 移出下边区域
+          if (
+            e.clientY +
+              this.rectOfDragObj.height -
+              this.rectOfDragObj.height / 2 >
+            clientHeight
+          ) {
+            topDistance = clientHeight - this.rectOfDragObj.height
+          }
+
+          // 改变元素定位
+          this.dragObj.style.top = `${topDistance}px`
+          this.dragObj.style.left = `${leftDistance}px`
+        },
+      }
+
+      const dragDom = document.getElementById('drag_dom')
+      const parentDom = document.getElementById('drag_parent')
+      dragObjCom.dragDomFunc(dragDom, parentDom)
+    </script>
+  </body>
+</html>
