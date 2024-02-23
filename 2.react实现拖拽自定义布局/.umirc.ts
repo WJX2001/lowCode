@@ -34,6 +34,11 @@ export default defineConfig({
       path: '/dragComp',
       component: './DragComp',
     },
+    {
+      name: ' 可拖拽自定义布局测试',
+      path: '/dragCompTest',
+      component: './DragTest',
+    },
   ],
   npmClient: 'yarn',
 });

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #draggableElement {
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+        color: white;
+        text-align: center;
+        line-height: 100px;
+        position: absolute;
+        cursor: move;
+        transform-origin: top left;
+        transform-origin: top left;
+        transition: transform 0.2s ease; /* 添加过渡效果 */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="draggableElement">Drag me</div>
+    <script>
+      // 获取拖动元素
+      var draggableElement = document.getElementById('draggableElement')
+
+      // 记录鼠标位置和拖动元素位置的差值
+      var offsetX, offsetY
+
+      // 鼠标按下时触发
+      draggableElement.addEventListener('mousedown', function (e) {
+        // 计算鼠标位置和拖动位置的差值
+
+        /**
+         * 其中 e.clientX 是鼠标指针相对于浏览器视口的水平位置
+         * draggableElement.getBoundingClientRect().left 是拖动元素相对于浏览器视口左边缘的距离
+         * 两者差值 可以得到鼠标在拖动元素内部的水平偏移量 即鼠标指针相对于拖动元素左边缘的位置
+         * 这样是为了在拖动元素内部准确计算鼠标的偏移量 以便在拖动过程中使拖动元素跟随鼠标移动 而不是立即跳转到鼠标的位置
+         */
+        offsetX = e.clientX - draggableElement.getBoundingClientRect().left
+        offsetY = e.clientY - draggableElement.getBoundingClientRect().top
+
+        // 当鼠标移动时触发
+        document.addEventListener('mousemove', dragElementFunc)
+
+        // 当鼠标松开时触发
+        document.addEventListener('mouseup', stopDraggingFunc)
+      })
+
+      // 拖动函数
+      function dragElementFunc(e) {
+        // 计算拖动元素的新位置
+
+        // 通过计算鼠标指针在拖动元素内部的偏移量 即（offsetX 和 offsetY）在拖动过程中保持相对位置不变
+        // 无论鼠标指针在拖动元素内部的哪个位置，元素都会随鼠标移动 但仍然保持与鼠标指针的相对位置一致
+        var posX = e.clientX - offsetX
+        var posY = e.clientY - offsetY
+
+        // 设置拖动元素的新位置
+        draggableElement.style.left = posX + 'px'
+        draggableElement.style.top = posY + 'px'
+
+        // 在拖动时进行放大
+        draggableElement.style.transform = 'scale(1.2)' // 例如放大到原始尺寸的 120%
+      }
+
+      // 停止拖动函数
+      function stopDraggingFunc() {
+        // 移除鼠标移动和鼠标松开事件监听器
+        document.removeEventListener('mousemove', dragElementFunc)
+        document.removeEventListener('mouseup', stopDraggingFunc)
+
+        // 拖动停止时恢复初始大小
+        draggableElement.style.transform = 'scale(1)'
+      }
+    </script>
+  </body>
+</html>
