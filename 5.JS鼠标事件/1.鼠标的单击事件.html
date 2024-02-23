@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input
+      type="button"
+      name="Submit"
+      value="背景变色"
+      onclick="turncolors()"
+    />
+    <script>
+      var colorArray = ['olive', 'teal', 'red', 'blue', 'maroon', 'navy']
+      var n = 0
+      function turncolors() {
+        if (n === colorArray.length - 1) {
+          n = 0
+        }
+        n++
+        document.bgColor = colorArray[n]
+      }
+    </script>
+  </body>
+</html>
