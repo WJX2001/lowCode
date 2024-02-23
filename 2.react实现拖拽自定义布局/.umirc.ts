@@ -29,7 +29,11 @@ export default defineConfig({
       path: '/table',
       component: './Table',
     },
+    {
+      name: ' 可拖拽自定义布局',
+      path: '/dragComp',
+      component: './DragComp',
+    },
   ],
   npmClient: 'yarn',
 });
-

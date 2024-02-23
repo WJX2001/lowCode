@@ -1,0 +1,15 @@
+.drag-line {
+  width: 2px;
+  margin: 0 calc((var(--drag-gap, 16px) - 2px) / 2);
+  background: transparent;
+  cursor: col-resize;
+
+  &.active,
+  &:hover {
+    background: blue;
+  }
+}
+
+.dragging {
+  user-select: none; // 内容不可选择
+}
